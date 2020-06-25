@@ -1,0 +1,93 @@
+using System;
+using System.Text;
+
+namespace PolymorphismExercise1
+{
+    public abstract class DbConnection
+    {
+        public string ConnectionString { get; set; }
+        public TimeSpan Timeout { get; set; }
+        public DbConnection(string connection)
+        {
+            if (connection == null)
+            {
+                throw new InvalidCastException();
+            }
+            connection = ConnectionString;
+        }
+        public abstract void Open(); 
+        public abstract void Close();
+    }
+    public class SqlConnection : DbConnection
+    {
+        public SqlConnection(string connection) : base(connection)
+        {
+        }
+
+        public override void Close()
+        {
+            Console.WriteLine("SQL Connection has been closed");
+        }
+
+        public override void Open()
+        {
+            Console.WriteLine("SQL Connection has been opened");
+        }
+    }
+    public class OracleConnection : DbConnection
+    {
+        public OracleConnection(string connection) : base(connection)
+        {
+        }
+
+        public override void Close()
+        {
+            Console.WriteLine("Oracle Connection has been closed");
+        }
+
+        public override void Open()
+        {
+            Console.WriteLine("Oracle Connection has been opened");
+        }
+    }
+    public class DbCommand
+    {
+        private readonly DbConnection _connection;
+        private readonly string _instruction;
+        public DbCommand(DbConnection connection, string instruction)
+        {
+            _connection = connection;
+            _instruction = instruction;
+            if (_connection == null || _instruction == null)
+            {
+                throw new InvalidCastException();
+            }
+        }
+        public void Execute()
+        {
+            _connection.Open();
+            Console.WriteLine("SQL Code: " + _instruction);
+            _connection.Close();
+        }
+    }
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            var builder = new StringBuilder();
+            builder.Append('*', 10);
+
+
+            var sqlConnection = new SqlConnection(@"\ROOT\SQL CONNECT");
+            var oracleConnection = new OracleConnection(@"\ROOT\ORACLE CONNECT");
+
+            var sqlCommand = new DbCommand(sqlConnection, "Select * from dbo.Table");
+            var oracleCommand = new DbCommand(oracleConnection, "Select * from dbo.Table");
+
+            sqlCommand.Execute();
+            Console.WriteLine(builder);
+            oracleCommand.Execute();
+
+        }
+    }
+}
